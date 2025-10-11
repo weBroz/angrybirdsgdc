@@ -160,7 +160,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             display: block;
         }
 
-        #winScreen, #loseScreen {
+        #winScreen, #loseScreen, #confirmDialog {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -175,10 +175,16 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             max-width: 90%;
         }
 
-        #winScreen h2, #loseScreen h2 {
+        #winScreen h2, #loseScreen h2, #confirmDialog h2 {
             color: white;
             font-size: 28px;
             margin-bottom: 15px;
+        }
+
+        #confirmDialog p {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 20px;
         }
 
         .stars {
@@ -210,6 +216,10 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
         .actionBtn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .actionBtn.secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
         }
 
         #birdSelector {
@@ -391,12 +401,16 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 font-size: 10px;
             }
 
-            #winScreen, #loseScreen {
+            #winScreen, #loseScreen, #confirmDialog {
                 padding: 20px;
             }
 
-            #winScreen h2, #loseScreen h2 {
+            #winScreen h2, #loseScreen h2, #confirmDialog h2 {
                 font-size: 22px;
+            }
+
+            #confirmDialog p {
+                font-size: 16px;
             }
 
             .stars {
@@ -547,7 +561,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             <h2>🐦 Angry Birds 🐦</h2>
             <div class="levelsGrid" id="levelsGrid"></div>
             <div class="totalScore">Total Score: <span id="totalScoreDisplay">0</span></div>
-            <button id="resetBtn" onclick="resetProgress()">Reset Progress</button>
+            <button id="resetBtn" onclick="showResetConfirm()">Reset Progress</button>
         </div>
 
         <div id="winScreen">
@@ -555,17 +569,26 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             <div class="stars" id="starRating">⭐⭐⭐</div>
             <div style="color: white; font-size: 20px; margin: 10px 0;">Score: <span id="levelScore">0</span></div>
             <div class="actionButtons">
-                <button class="actionBtn" onclick="nextLevel()">Next ➡️</button>
-                <button class="actionBtn" onclick="retryLevel()">Retry 🔄</button>
                 <button class="actionBtn" onclick="showLevelSelect()">Menu 🏠</button>
+                <button class="actionBtn" onclick="retryLevel()">Retry 🔄</button>
+                <button class="actionBtn" onclick="nextLevel()">Next ➡️</button>
             </div>
         </div>
 
         <div id="loseScreen">
             <h2>Try Again!</h2>
             <div class="actionButtons">
-                <button class="actionBtn" onclick="retryLevel()">Retry 🔄</button>
                 <button class="actionBtn" onclick="showLevelSelect()">Menu 🏠</button>
+                <button class="actionBtn" onclick="retryLevel()">Retry 🔄</button>
+            </div>
+        </div>
+
+        <div id="confirmDialog">
+            <h2>Confirm Reset</h2>
+            <p>Are you sure you want to reset all progress?</p>
+            <div class="actionButtons">
+                <button class="actionBtn secondary" onclick="hideResetConfirm()">Cancel</button>
+                <button class="actionBtn" onclick="confirmReset()">Ok</button>
             </div>
         </div>
 
@@ -742,16 +765,25 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             localStorage.setItem('angryBirdsProgress', JSON.stringify(data));
         }
 
-        // Reset progress
-        function resetProgress() {
-            if (confirm('Are you sure you want to reset all progress?')) {
-                localStorage.removeItem('angryBirdsProgress');
-                levelScores = {};
-                levelStars = {};
-                unlockedLevels = 1;
-                totalScore = 0;
-                createLevelSelector();
-            }
+        // Show reset confirmation dialog
+        function showResetConfirm() {
+            document.getElementById('confirmDialog').style.display = 'block';
+        }
+
+        // Hide reset confirmation dialog
+        function hideResetConfirm() {
+            document.getElementById('confirmDialog').style.display = 'none';
+        }
+
+        // Confirm and reset progress
+        function confirmReset() {
+            localStorage.removeItem('angryBirdsProgress');
+            levelScores = {};
+            levelStars = {};
+            unlockedLevels = 1;
+            totalScore = 0;
+            hideResetConfirm();
+            createLevelSelector();
         }
 
         // Particle class for effects
