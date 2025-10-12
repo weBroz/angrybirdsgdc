@@ -9,7 +9,7 @@ A lightweight, browser-based implementation of the classic physics-based puzzle 
   * High score and star rating system ⭐
   * Different birds with unique abilities 💥
   * Responsive design for desktop and mobile 📱
-  * Colorful cartoon graphics and sound effects 🎨
+  * Colorful cartoon graphics 🎨
 
 ## 🚀 Getting Started
 
@@ -33,7 +33,7 @@ That’s it\! No build tools or server required.
 
 ## Online Demo
 
-You can also play directly by opening the project in a static hosting service (e.g., GitHub Pages, Netlify).
+You can access the latest version live here: **[angrybirdsjs.github.io](https://angrybirdsjs.github.io)**
 
 ## 📁 Project Structure
 
