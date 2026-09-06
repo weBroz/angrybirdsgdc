@@ -150,18 +150,67 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
         #bottomBar {
             position: absolute;
             bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: rgba(20, 24, 35, 0.85);
             border: 3px solid rgba(255, 255, 255, 0.25);
-            border-radius: 24px;
-            padding: 8px 18px;
+            border-radius: 20px;
+            padding: 6px 14px;
             box-shadow: var(--ui-shadow);
             backdrop-filter: blur(8px);
             z-index: 100;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #bottomBar.aiming {
+            opacity: 0.12 !important;
+            pointer-events: none !important;
+        }
+
+        .lineupToggleBtn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .lineupToggleBtn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        #bottomBar.collapsed {
+            padding: 4px 10px;
+            background: rgba(20, 24, 35, 0.7);
+        }
+
+        #bottomBar.collapsed .birdQueueTitle,
+        #bottomBar.collapsed #birdSelector {
+            display: none !important;
+        }
+
+        .collapsedLabel {
+            display: none;
+        }
+
+        #bottomBar.collapsed .collapsedLabel {
+            display: inline-block !important;
+            font-size: 13px;
+            color: var(--primary-yellow);
+            margin: 0 4px;
+            font-family: 'Lilita One', sans-serif;
+            letter-spacing: 0.5px;
         }
 
         .birdQueueTitle {
@@ -684,18 +733,44 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
                 font-size: 18px;
             }
             .hudBtn {
-                width: 44px;
-                height: 44px;
+                width: 42px;
+                height: 42px;
                 font-size: 18px;
                 border-radius: 12px;
             }
+            .birdPill {
+                width: 38px;
+                height: 38px;
+            }
+        }
+
+        /* Mobile Landscape Mode: Move lineup to top-left sky so ground is 100% unobstructed */
+        @media (max-height: 560px), (orientation: landscape) and (max-height: 600px) {
             #bottomBar {
-                bottom: max(6px, env(safe-area-inset-bottom));
-                padding: 4px 10px;
+                bottom: auto;
+                top: max(56px, calc(env(safe-area-inset-top) + 48px));
+                left: max(8px, env(safe-area-inset-left));
+                transform: none;
+                padding: 4px 8px;
+                border-radius: 14px;
+                gap: 6px;
+                background: rgba(15, 20, 30, 0.75);
+                border-width: 2px;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+            }
+            .birdQueueTitle {
+                display: none !important; /* Hide bulky text in landscape so ground stays 100% clear */
             }
             .birdPill {
-                width: 40px;
-                height: 40px;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                border-width: 2px;
+            }
+            .lineupToggleBtn {
+                width: 22px;
+                height: 22px;
+                font-size: 11px;
             }
         }
     </style>
@@ -743,6 +818,8 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
 
         <!-- Bottom Bird Selector -->
         <div id="bottomBar">
+            <button id="btnToggleLineup" class="lineupToggleBtn" title="Toggle Bird Lineup View">‹</button>
+            <span class="collapsedLabel" id="collapsedLineupText">🐦 BIRDS</span>
             <span class="birdQueueTitle">BIRD LINEUP:</span>
             <div id="birdSelector"></div>
         </div>
@@ -2651,6 +2728,11 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
                 };
                 container.appendChild(pill);
             });
+
+            const collapsedLabel = document.getElementById('collapsedLineupText');
+            if (collapsedLabel) {
+                collapsedLabel.textContent = `🐦 ${levelBirdQueue.length}`;
+            }
         }
 
         function updateHUD() {
@@ -3530,6 +3612,8 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
                 if (dist < grabRadius) {
                     isDraggingSlingshot = true;
                     canvas.classList.add('dragging');
+                    const bBar = document.getElementById('bottomBar');
+                    if (bBar) bBar.classList.add('aiming');
                     return;
                 }
             }
@@ -3577,6 +3661,8 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
             if (isDraggingSlingshot && activeBird && !activeBird.launched) {
                 isDraggingSlingshot = false;
                 canvas.classList.remove('dragging');
+                const bBar = document.getElementById('bottomBar');
+                if (bBar) bBar.classList.remove('aiming');
 
                 const dx = slingshot.x - activeBird.x;
                 const dy = slingshot.y - activeBird.y;
@@ -3645,6 +3731,8 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
                 // Two-finger pinch / camera pan
                 isDraggingSlingshot = false;
                 canvas.classList.remove('dragging');
+                const bBar = document.getElementById('bottomBar');
+                if (bBar) bBar.classList.remove('aiming');
                 isPinching = true;
 
                 const t1 = e.touches[0];
@@ -3806,6 +3894,18 @@ Enhanced & Polished with Advanced Procedural Graphics, Web Audio, Physics & Dyna
             document.getElementById('modalConfirmReset').style.display = 'none';
             showLevelSelectModal();
         };
+
+        // Bird Lineup Minimize / Expand Toggle
+        const toggleLineupBtn = document.getElementById('btnToggleLineup');
+        if (toggleLineupBtn) {
+            toggleLineupBtn.onclick = () => {
+                const bBar = document.getElementById('bottomBar');
+                if (!bBar) return;
+                const isCollapsed = bBar.classList.toggle('collapsed');
+                toggleLineupBtn.textContent = isCollapsed ? '›' : '‹';
+                toggleLineupBtn.title = isCollapsed ? 'Expand Bird Lineup' : 'Minimize Bird Lineup';
+            };
+        }
 
         // Modal Close (X) Buttons
         const bindCloseBtn = (id) => {
